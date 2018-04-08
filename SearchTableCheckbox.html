@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Beniamin Kwiek sample code, DONOTREMOVE-->
+    <meta charset="utf-8">
+    <title>Beniamin demo</title>
+    <style>
+        body {
+            font-family: 'Arial';
+            color: #646464;
+        }
+        
+        .sted-wrap {
+            float: left;
+            width: 20%;
+            margin: 0 5% 0 0;
+            padding: 0;
+        }
+        
+        .wrap {
+            float: left;
+            width: 20%;
+            margin: 0 5% 0 0;
+            padding: 0;
+            position: relative;
+        }
+        
+        .items {
+            float: left;
+            width: 50%;
+        }
+        
+        .ItemIndex div {
+            float: left;
+            width: 90%;
+            height: 68px;
+            line-height: 68px;
+            padding: 0 5%;
+            background: #eee;
+            margin: 0 0 1px;
+            position: relative;
+        }
+
+    </style>
+    <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+</head>
+<pre id=result> </pre>
+
+<div class="wrap">
+
+    <h3 style="font-size:14px; font-weight:normal;">Internet</h3>
+    <form>
+        <label style="font-size:12px;"><input type="checkbox" name="ItemUtility" value="internet" id="internet" /> Internet</label><br>
+    </form>
+    <p style="font-size:12px;"><strong>Strøm</strong></p>
+    <form>
+        <label style="font-size:12px;"><input type="checkbox" name="ItemUtility2" value="strøm" id="strøm" /> strøm</label><br>
+    </form>
+</div>
+<div class="sted-wrap">
+    <h3 style="font-size:14px; font-weight:normal;">Sted</h3>
+    <div class="sted" style="font-size:12px;">
+        <div>gudbransdalen <input type="checkbox" name="ItemSted" value="gudbransdalen" id="gudbransdalen" /></div>
+        <div>ringerike<input type="checkbox" name="ItemSted" value="ringerike" id="ringerike" /></div>
+        <div>Rogaland<input type="checkbox" name="ItemSted" value="rogaland" id="rogaland" /></div>
+    </div>
+
+</div>
+<!--For å legge til "søkediskriminator" legg til lowercase i datacategory på det du hvil. For å kvantifisere kopier HTML/JS til eksisterende. Her ligger hyttene med styling nedover -->
+<div class="ItemIndex">
+    <div class="Item" data-id="aloe" data-category="strøm internet skiløyper ringerike">Skiløype, Strøm og internet OG i ringerike</div>
+    <div class="Item" data-id="scarlet-carnation" data-category="internet strøm gudbransdalen">Hytte med Internet og strøm OG i gudbransdalen</div>
+    <div class="Item" data-id="indian-paintbrush" data-category="internet strøm rogaland">Hytte med interet og strøm OG i Rogaland </div>
+    <div class="Item" data-id="indian-paintbrush" data-category="rogaland">Rogaland </div>
+
+</div>
+<script>
+    var byProperty = [],
+        byColor = [],
+        byLocation = [];
+
+    $("input[name=ItemUtility]").on("change", function() {
+        if (this.checked) byProperty.push("[data-category~='" + $(this).attr("value") + "']");
+        else removeA(byProperty, "[data-category~='" + $(this).attr("value") + "']");
+    });
+
+    $("input[name=ItemUtility2]").on("change", function() {
+        if (this.checked) byColor.push("[data-category~='" + $(this).attr("value") + "']");
+        else removeA(byColor, "[data-category~='" + $(this).attr("value") + "']");
+    });
+
+
+    $("input[name=ItemSted]").on("change", function() {
+        if (this.checked) byLocation.push("[data-category~='" + $(this).attr("value") + "']");
+        else removeA(byLocation, "[data-category~='" + $(this).attr("value") + "']");
+    });
+
+    $("input").on("change", function() {
+        var str = "Include items \n";
+        var selector = '',
+            cselector = '',
+            nselector = '';
+
+        var $lis = $('.ItemIndex > div'),
+            $checked = $('input:checked');
+
+        if ($checked.length) {
+
+            if (byProperty.length) {
+                if (str == "Include items \n") {
+                    str += "    " + "with (" + byProperty.join(',') + ")\n"; /* SHOWTEXT*/
+                    $($('input[name=ItemUtility]:checked')).each(function(index, byProperty) {
+                        if (selector === '') {
+                            selector += "[data-category~='" + byProperty.id + "']";
+                        } else {
+                            selector += ",[data-category~='" + byProperty.id + "']";
+                        }
+                    });
+                } else {
+                    str += "    AND " + "with (" + byProperty.join(' OR ') + ")\n";
+                    $($('input[name=ItemUtility2]:checked')).each(function(index, byProperty) {
+                        selector += "[data-category~='" + byProperty.id + "']";
+                    });
+                }
+            }
+
+            if (byColor.length) {
+                if (str == "Include items \n") {
+                    str += "    " + "with (" + byColor.join(' OR ') + ")\n"; /* SHOWTEXT*/
+                    $($('input[name=ItemUtility2]:checked')).each(function(index, byColor) {
+                        if (selector === '') {
+                            selector += "[data-category~='" + byColor.id + "']";
+                        } else {
+                            selector += ",[data-category~='" + byColor.id + "']";
+                        }
+                    });
+                } else {
+                    str += "    AND " + "with (" + byColor.join(' OR ') + ")\n"; /* SHOWTEXT*/
+                    $($('input[name=ItemUtility2]:checked')).each(function(index, byColor) {
+                        if (cselector === '') {
+                            cselector += "[data-category~='" + byColor.id + "']";
+                        } else {
+                            cselector += ",[data-category~='" + byColor.id + "']";
+                        }
+                    });
+                }
+            }
+
+            if (byLocation.length) {
+                if (str == "Include items \n") {
+                    str += "    " + "with (" + byLocation.join(' OR ') + ")\n";
+                    $($('input[name=ItemSted]:checked')).each(function(index, byLocation) {
+                        if (selector === '') {
+                            selector += "[data-category~='" + byLocation.id + "']";
+                        } else {
+                            selector += ",[data-category~='" + byLocation.id + "']";
+                        }
+                    });
+                } else {
+                    str += "    AND " + "with (" + byLocation.join(' OR ') + ")\n";
+                    $($('input[name=ItemSted]:checked')).each(function(index, byLocation) {
+                        if (nselector === '') {
+                            nselector += "[data-category~='" + byLocation.id + "']";
+                        } else {
+                            nselector += ",[data-category~='" + byLocation.id + "']";
+                        }
+                    });
+                }
+            }
+
+            $lis.hide();
+            console.log(selector);
+            console.log(cselector);
+            console.log(nselector);
+
+            if (cselector === '' && nselector === '') {
+                $('.ItemIndex > div').filter(selector).show();
+            } else if (cselector === '') {
+                $('.ItemIndex > div').filter(selector).filter(nselector).show();
+            } else if (nselector === '') {
+                $('.ItemIndex > div').filter(selector).filter(cselector).show();
+            } else {
+                $('.ItemIndex > div').filter(selector).filter(cselector).filter(nselector).show();
+            }
+
+        } else {
+            $lis.show();
+        }
+
+        $("#result").html(str);
+
+    });
+
+    function removeA(arr) {
+        var what, a = arguments,
+            L = a.length,
+            ax;
+        while (L > 1 && arr.length) {
+            what = a[--L];
+            while ((ax = arr.indexOf(what)) !== -1) {
+                arr.splice(ax, 1);
+            }
+        }
+        return arr;
+    }
+
+</script>
+
+</body>
+
+</html>
